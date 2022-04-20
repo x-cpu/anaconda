@@ -105,6 +105,7 @@ FROM
 p.pbatch BatchName
 from [mtv-va-sql-1\p922].dva.dbo.physicalbatch p with (NOLOCK)
 where p.pbatch like '02%'
+and p.pbatch not like '%test%'
 and exists (select * from [mtv-va-sql-1\p922].dva.dbo.customerCheckIn where
 p.RMN = RMN and claimtype = 'OMPF') 
 and p.invtime >= '2021-06-10') T 
@@ -252,6 +253,7 @@ where claimtype = 'OMPF'
 and insertdate >= '2021-06-10' and p.RMN = RMN)
 and p.InvTime >= '2021-06-10'
 and p.PBatch like '02%'
+and p.PBatch not like '%test%'
 group by p.RMN) T
 left join PhysicalBatch p
 on T.RMN = p.RMN
@@ -315,8 +317,8 @@ writer.save()
 # In[19]:
 
 
-receiver = ['lunnie.smith@exelaonline.com']
-copy = ['lunnie.smith@exelaonline.com']
+receiver = ['John.Blankenship@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Donald.Bendavid@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Sherry.Hyde@exleonline.com', 'Regina.Brady@exelaonline.com', 'Kellie.Lake@exelaonline.com', 'Alexis.Stewart@exelaonline.com', 'Jailyn.Allen@exelaonline.com', 'Kanzas.Hicks@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Elizabeth.England@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Deborah.Otis@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'John.VanWinkle@exelaonline.com' ]
+copy = ['sam.momin@exelaonline.com', 'sasha.wernersbach@exelaonline.com', 'lunnie.smith@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com']
 #receiver = ['Virginia.Brantley@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Brenda.Brock@exelaonline.com', 'Chris.Birkeland@exelaonline.com' ]
 #copy = ['Sam.Momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
 body = 'Please find the latest VA Image and Box Inventory Report for OMPF within attached spreadsheets.'

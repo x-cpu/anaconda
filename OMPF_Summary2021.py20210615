@@ -38,7 +38,8 @@ from PbatchDCSMapping p WITH (NOLOCK)
 left join PhysicalBatch pp
 on p.Pbatch = pp.PBatch
 where exists (select * from customerCheckIn where p.RMN = RMN
-and claimtype = 'OMPF')''', cnxn)
+and claimtype = 'OMPF') and p.PBatch like '02%'
+''', cnxn)
 
 
 # In[5]:
@@ -117,6 +118,7 @@ engine = create_engine('sqlite://', echo=False)
 
 
 # In[10]:
+
 
 
 df = pd.DataFrame(sql_query)
@@ -228,11 +230,33 @@ left join ibatches i
 on T.Batchname = i.BatchName
 order by T.BatchName''')
 finale2 = pd.DataFrame(results2)
-finale2.columns = ['RMN', 'TrackingNo', 'BatchName', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper', 'Paper(DCSID Count)', 'SpecialMedia(DCSID Count)']
+#finale2
+#commented out cause results is null
+#finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
 #finale2
 
 
 # In[13]:
+
+
+if finale2.empty:
+    results2 = {'RMN': [''], 
+                'TrackingNo': [''], 
+                'BatchName': [''], 
+                'OpenBoxBatchLocation': [''], 
+                'BatchStatus': [''], 
+                'TotalImages(OpenBox)': [''], 
+                'SpecialMedia/Paper': [''], 
+                'Paper(DCSID Count)': [''], 
+                'SpecialMedia(DCSID Count)': ['']}
+    finale2 = pd.DataFrame(results2)
+    finale2.columns = ['RMN', 'TrackingNo', 'BatchName', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper', 'Paper(DCSID Count)', 'SpecialMedia(DCSID Count)']
+    
+else:
+    finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
+
+
+# In[14]:
 
 
 results3 = engine.execute('''select distinct T.RMN, T.TrackingNo, T.BatchName, T.DCSID,
@@ -292,16 +316,37 @@ left join ibatches i
 on T.Batchname = i.BatchName
 order by T.BatchName''')
 finale3 = pd.DataFrame(results3)
-finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
+#finale3
+#commented out cause results is null
+#finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
 
 
-# In[14]:
+# In[15]:
+
+
+if finale3.empty:
+    results3 = {'RMN': [''], 
+                'TrackingNo': [''], 
+                'BatchName': [''], 
+                'DCSID': [''],
+                'OpenBoxBatchLocation': [''], 
+                'BatchStatus': [''], 
+                'TotalImages(OpenBox)': [''], 
+                'SpecialMedia/Paper': ['']}
+    finale3 = pd.DataFrame(results3)
+    finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
+    
+else: finale3.columns = ['RMN', 'TrackingNo', 'BatchName', 'DCSID', 'OpenBoxBatchLocation', 'BatchStatus', 'TotalImages(OpenBox)', 'SpecialMedia/Paper']
+    
+
+
+# In[16]:
 
 
 writer = pd.ExcelWriter(r'\\atl-va-fs06\data\OMPF\2021\OMPF_Summary_' + fileDate + '.xlsx', engine='xlsxwriter')
 
 
-# In[15]:
+# In[17]:
 
 
 finale.to_excel(writer, sheet_name='OMPF Summary', index=False)
@@ -379,18 +424,18 @@ worksheet.add_table(xlsxwriter.utility.xl_range(0,0, len(finale3), len(finale3.c
 writer.save()
 
 
-# In[19]:
+# In[18]:
 
 
-receiver = ['Clarissa.Hubbard@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Trimeka.Parks@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Donald.BenDavid@exelaonline.com', 'Rebekah.Taulbee@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Stephanie.King@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Brandon.Lewis@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Robert.Searcy@exelaonline.com', 'Sherry.Hyde@exelaonline.com', 'Juarez.Johnson@exelaonline.com', 'Geoff.Brinton@exelaonline.com']
+receiver = ['Clarissa.Hubbard@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Trimeka.Parks@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Donald.BenDavid@exelaonline.com', 'Rebekah.Taulbee@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Stephanie.King@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Brandon.Lewis@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Robert.Searcy@exelaonline.com', 'Sherry.Hyde@exelaonline.com', 'Juarez.Johnson@exelaonline.com', 'Geoff.Brinton@exelaonline.com', 'Michael.Cincinelli@exelaonline.com', 'Jailyn.Allen@exelaonline.com', 'Kanzas.Hicks@exelaonline.com', 'Regina.Brady@exelaonline.com', 'Kellie.Lake@exelaonline.com', 'Summer.Owens@exelaonline.com', 'Deborah.Otis@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Elizabeth.England@exelaonline.com', 'ryan.oquinn@exelaonline.com' ]
 copy = ['lunnie.smith@exelaonline.com', 'sam.momin@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com', 'sasha.wernersbach@exelaonline.com']
-#receiver = 'lunnie.smith@exelaonline.com'
-#copy = 'lunnie.smith@exelaonline.com'
+#receiver = ['lunnie.smith@exelaonline.com']
+#copy = ['lunnie.smith@exelaonline.com']
 body = 'Please find the latest OMPF summary within attached spreadsheet.'
 xfilename = filename + '.xlsx'
 
 
-# In[20]:
+# In[19]:
 
 
 yag = yagmail.SMTP(user={'atlhome@lason.com': 'Exela Automated'}, password='lason123', 

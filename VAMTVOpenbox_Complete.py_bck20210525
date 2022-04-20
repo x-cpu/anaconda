@@ -57,9 +57,6 @@ from document d
 where d.ftpstime >= '2021-01-01'
 and (d.pbatch like '01%' or d.pbatch like '02%' 
 or d.pbatch like '07%' or d.pbatch like '08%')
-and d.SysKey not in (select syskey from document where ftpstime >'5/1/2021 0:0:0'
-and ftpstime <'6/1/2021 0:0:0'
-and dcsid in (select dcs from xompf5550))
 group by d.PBatch, d.RMN, CONVERT(varchar, d.ftpstime, 101)) T''', cnxn)
 
 
@@ -73,7 +70,6 @@ FROM
 from PhysicalBatch p
 where (p.pbatch like '01%' or p.pbatch like '02%' 
 or p.pbatch like '07%' or p.pbatch like '08%')
---changed back to date below on 7/6/21 due to RMC count issues in June
 and p.InvTime >= '2018-08-27') T
 left join customercheckin c
 on T.RMN = c.RMN''', cnxn)

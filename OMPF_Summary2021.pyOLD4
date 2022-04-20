@@ -382,7 +382,7 @@ writer.save()
 # In[19]:
 
 
-receiver = ['Clarissa.Hubbard@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Trimeka.Parks@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Donald.BenDavid@exelaonline.com', 'Rebekah.Taulbee@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Stephanie.King@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Brandon.Lewis@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Robert.Searcy@exelaonline.com', 'Sherry.Hyde@exelaonline.com', 'Juarez.Johnson@exelaonline.com', 'Geoff.Brinton@exelaonline.com']
+receiver = ['Clarissa.Hubbard@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Trimeka.Parks@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Donald.BenDavid@exelaonline.com', 'Rebekah.Taulbee@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Stephanie.King@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Brandon.Lewis@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Robert.Searcy@exelaonline.com', 'Juarez.Johnson@exelaonline.com', 'Geoff.Brinton@exelaonline.com']
 copy = ['lunnie.smith@exelaonline.com', 'sam.momin@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com', 'sasha.wernersbach@exelaonline.com']
 #receiver = 'lunnie.smith@exelaonline.com'
 #copy = 'lunnie.smith@exelaonline.com'

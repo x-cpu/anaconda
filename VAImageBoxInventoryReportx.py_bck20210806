@@ -315,8 +315,8 @@ writer.save()
 # In[19]:
 
 
-receiver = ['lunnie.smith@exelaonline.com']
-copy = ['lunnie.smith@exelaonline.com']
+receiver = ['John.Blankenship@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Donald.Bendavid@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Sherry.Hyde@exleonline.com', 'Regina.Brady@exelaonline.com', 'Kellie.Lake@exelaonline.com', 'Alexis.Stewart@exelaonline.com', 'Jailyn.Allen@exelaonline.com', 'Kanzas.Hicks@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Elizabeth.England@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Deborah.Otis@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Virginia.Todd@exelaonline.com']
+copy = ['sam.momin@exelaonline.com', 'sasha.wernersbach@exelaonline.com', 'lunnie.smith@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com']
 #receiver = ['Virginia.Brantley@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Brenda.Brock@exelaonline.com', 'Chris.Birkeland@exelaonline.com' ]
 #copy = ['Sam.Momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
 body = 'Please find the latest VA Image and Box Inventory Report for OMPF within attached spreadsheets.'
