@@ -1,0 +1,349 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pyodbc
+import pandas as pd
+from datetime import datetime
+import os
+import sqlite3
+from sqlalchemy import create_engine
+import xlsxwriter
+import yagmail
+
+
+# In[2]:
+
+
+cnxn = pyodbc.connect("Driver={SQL Server};SERVER=mtv-va-sql-4\p1;Database=TURBOSCANNG1;UID=dva;PWD=Happy_Trails")
+
+
+# In[3]:
+
+
+fileDate = datetime.now().strftime("%m%d%Y_%H%M")
+fileDate2 = datetime.now().strftime("%Y%m%d")
+outDIR = (r'\\atl-va-fs06\data\OMPF\2021')
+filename = os.path.join(outDIR, 'VAImageInventoryReport_' + fileDate)
+filename2 = os.path.join(outDIR, 'VABoxInventoryReport_' + fileDate)
+
+
+# In[4]:
+
+
+sql_query01 = pd.read_sql_query('''
+select distinct X.CheckInDate,
+sum(X.ImageCount) ImageCount,
+sum(X.Capture) Capture, 
+sum(X.Enhance1) Enhance1,
+sum(X.FullPageOCR) FullPageOCR, 
+sum(X.Enhance2) Enhance2, sum(X.Separation) Separation,
+sum(X.ImageQC) ImageQC, sum(X.AutoIndex) AutoIndex, 
+sum(X.DocID) DocID, sum(X.DocIDQC) DocIDQC,
+sum(X.ManualIndex) ManualIndex, 
+sum(X.Verification) Verification, 
+sum(X.Export) Export, 
+sum(X.Completed) Clean
+FROM
+(select distinct T.CheckInDate, ISNULL(sum(b.TotalImages), 0) ImageCount,
+CASE 
+	WHEN b.WFStep = 1 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Capture,
+CASE 
+	WHEN b.WFStep = 2 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Enhance1,
+CASE 
+	WHEN b.WFStep = 3 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END FullPageOCR,
+CASE 
+	WHEN b.WFStep = 4 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Enhance2,
+CASE 
+	WHEN b.WFStep = 5 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Separation,
+CASE 
+	WHEN b.WFStep = 6 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END ImageQC,
+CASE 
+	WHEN b.WFStep = 7 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END AutoIndex,
+CASE 
+	WHEN b.WFStep = 8 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END DocID,
+CASE 
+	WHEN b.WFStep = 9 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END DocIDQC,
+CASE 
+	WHEN b.WFStep = 10 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END ManualIndex,
+CASE 
+	WHEN b.WFStep = 12 and b.BatchLocation = 64 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Verification,
+CASE 
+	WHEN b.WFStep = 13 and b.BatchLocation = 256 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Export,
+CASE 
+	WHEN b.WFStep = 13 and b.BatchLocation = 0 Then ISNULL(sum(b.TotalImages), 0)
+	ELSE 0
+	END Completed
+FROM
+(select distinct CONVERT(varchar, p.invtime, 101) CheckInDate,
+p.pbatch BatchName
+from [mtv-va-sql-1\p922].dva.dbo.physicalbatch p with (NOLOCK)
+where p.pbatch like '02%'
+and p.pbatch not like '%test%'
+and exists (select * from [mtv-va-sql-1\p922].dva.dbo.customerCheckIn where
+p.RMN = RMN and claimtype = 'OMPF') 
+and p.invtime >= '2021-06-10') T 
+left join Batches b
+on T.BatchName = b.BatchName
+where b.TotalImages is not null
+and (b.WFStep = 1 or b.WFStep = 2 or b.WFStep = 3 or 
+b.WFStep = 4 or b.WFStep = 5 or b.WFStep = 6 or 
+b.WFStep = 7 or b.WFStep = 8 or b.WFStep = 9 or b.WFStep = 10 or
+(b.WFStep = 12 and b.batchlocation = 64) or (b.WFStep = 13 and b.batchlocation = 256)
+or (b.WFStep = 13 and b.batchlocation = 0))
+and b.jobid = 8
+and b.batchname like '02%'
+and b.BatchName not like '%test%' 
+and b.Batchname not like '%train%'
+group by CheckInDate, b.WFStep, b.BatchLocation) X
+group by X.CheckInDate''', cnxn)
+
+
+# In[5]:
+
+
+finale3 = pd.DataFrame(sql_query01)
+
+
+# In[6]:
+
+
+if finale3.empty:
+    results3 = {'CheckInDate': [''], 
+                'ImageCount': [''], 
+                'Capture': [''], 
+                'Enhance1': [''], 
+                'FullPageOCR': [''], 
+                'Enhance2': [''],
+                'Separation': [''],
+                'ImageQC': [''],
+                'AutoIndex': [''],
+                'DocID': [''],
+                'DocIDQC': [''],
+                'ManualIndex': [''],
+                'Verification': [''],
+                'Export': [''],
+                'Clean': ['']}
+    finale3 = pd.DataFrame(results3)
+    finale3.columns = ['CheckInDate', 'ImageCount', 'Capture', 'Enhance1', 'FullPageOCR', 'Enhance2', 'Separation', 'ImageQC', 'AutoIndex', 'DocID', 'DocIDQC', 'ManualIndex', 'Verification', 'Export', 'Clean']
+    
+else:
+    finale3.columns = ['CheckInDate', 'ImageCount', 'Capture', 'Enhance1', 'FullPageOCR', 'Enhance2', 'Separation', 'ImageQC', 'AutoIndex', 'DocID', 'DocIDQC', 'ManualIndex', 'Verification', 'Export', 'Clean']
+
+
+# In[7]:
+
+
+writer = pd.ExcelWriter(r'\\atl-va-fs06\data\OMPF\2021\VAImageInventoryReport_' + fileDate + '.xlsx', engine='xlsxwriter')
+
+
+# In[8]:
+
+
+finale3.to_excel(writer, sheet_name='VAImageInventoryReport - OMPF', index=False)
+
+workbook = writer.book
+border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+worksheet = writer.sheets['VAImageInventoryReport - OMPF']
+worksheet.set_column('A:A', 14)
+worksheet.set_column('B:B', 14)
+worksheet.set_column('C:C', 10)
+worksheet.set_column('D:D', 11)
+worksheet.set_column('E:E', 14)
+worksheet.set_column('F:F', 11)
+worksheet.set_column('G:G', 12)
+worksheet.set_column('H:H', 11)
+worksheet.set_column('I:I', 12)
+worksheet.set_column('J:J', 8)
+worksheet.set_column('K:K', 11)
+worksheet.set_column('L:L', 15)
+worksheet.set_column('M:M', 13)
+worksheet.set_column('N:N', 9)
+worksheet.set_column('O:O', 8)
+worksheet.conditional_format(xlsxwriter.utility.xl_range(0,0, len(finale3), len(finale3.columns) - 1), {'type': 'no_errors', 'format': border_fmt})
+                                                                                                  
+options = {'style': 'Table Style Medium 2',
+          'columns': [{'header': 'CheckInDate'},
+                     {'header': 'ImageCount'},
+                     {'header': 'Capture'},
+                     {'header': 'Enhance1'},
+                     {'header': 'FullPageOCR'},
+                     {'header': 'Enhance2'},
+                     {'header': 'Separation'},
+                     {'header': 'ImageQC'},
+                     {'header': 'AutoIndex'},
+                     {'header': 'DocID'},                
+                     {'header': 'DocIDQC'},
+                     {'header': 'ManualIndex'},
+                     {'header': 'Verification'},
+                     {'header': 'Export'},                      
+                     {'header': 'Clean'}]}
+worksheet.add_table(xlsxwriter.utility.xl_range(0,0, len(finale3), len(finale3.columns) - 1), options)
+
+writer.save()
+
+
+# In[10]:
+
+
+cnxnx = pyodbc.connect("Driver={SQL Server};SERVER=mtv-va-sql-1\p922;Database=DVA;UID=dva;PWD=Happy_Trails")
+
+
+# In[11]:
+
+
+sql_query02 = pd.read_sql_query('''
+
+select distinct A.CheckInDate, count(distinct A.RMN) BoxCount,
+count(distinct A.Active) ACTIVE,
+count(distinct A.COMPLETED) COMPLETED
+FROM
+(select distinct Z.CheckInDate, Z.RMN,
+CASE
+	WHEN Z.Total - Z.Uploaded <> 0 Then Z.RMN
+	END ACTIVE,
+CASE
+	WHEN Z.Total - Z.Uploaded = 0 Then Z.RMN
+	END COMPLETED
+FROM
+(select distinct X.CheckInDate, X.RMN, count(distinct X.pbatch) Total,
+count(distinct X.NotUploaded) NotUploaded, 
+count(distinct X.Uploaded) Uploaded
+FROM
+(select distinct T.CheckInDate, T.RMN, p.PBatch,
+CASE
+	WHEN not exists (select * from document where p.PBatch = pbatch and ftpstime is not null)
+	THEN p.PBatch
+	END NotUploaded,
+CASE
+	WHEN exists (select * from document where p.PBatch = pbatch and ftpstime is not null)
+	THEN p.PBatch
+	END Uploaded
+FROM
+(select distinct p.RMN, CONVERT(varchar, min(p.InvTime), 101) CheckInDate 
+from PhysicalBatch p with (NOLOCK)
+where exists (select * from customerCheckIn 
+where claimtype = 'OMPF' 
+and insertdate >= '2021-06-10' and p.RMN = RMN)
+and p.InvTime >= '2021-06-10'
+and p.PBatch like '02%'
+and p.PBatch not like '%test%'
+group by p.RMN) T
+left join PhysicalBatch p
+on T.RMN = p.RMN
+left join document d
+on p.PBatch = d.PBatch) X
+group by X.CheckInDate, X.RMN) Z) A
+group by A.CheckInDate''', cnxnx)
+
+
+# In[12]:
+
+
+finale4 = pd.DataFrame(sql_query02)
+
+
+# In[13]:
+
+
+if finale4.empty:
+    results4 = {'CheckInDate': [''], 
+                'BoxCount': [''], 
+                'ACTIVE': [''], 
+                'COMPLETED': ['']}
+    finale4 = pd.DataFrame(results3)
+    finale4.columns = ['CheckInDate', 'BoxCount', 'ACTIVE', 'COMPLETED']
+    
+else:
+    finale4.columns =  ['CheckInDate', 'BoxCount', 'ACTIVE', 'COMPLETED']
+
+
+# In[14]:
+
+
+writer = pd.ExcelWriter(r'\\atl-va-fs06\data\OMPF\2021\VABoxInventoryReport_' + fileDate + '.xlsx', engine='xlsxwriter')
+
+
+# In[15]:
+
+
+finale4.to_excel(writer, sheet_name='VABoxInventoryReport - OMPF', index=False)
+
+workbook = writer.book
+border_fmt = workbook.add_format({'bottom':1, 'top':1, 'left':1, 'right':1})
+worksheet = writer.sheets['VABoxInventoryReport - OMPF']
+worksheet.set_column('A:A', 14)
+worksheet.set_column('B:B', 12)
+worksheet.set_column('C:C', 9)
+worksheet.set_column('D:D', 14)
+worksheet.conditional_format(xlsxwriter.utility.xl_range(0,0, len(finale4), len(finale4.columns) - 1), {'type': 'no_errors', 'format': border_fmt})
+                                                                                                  
+options = {'style': 'Table Style Medium 2',
+          'columns': [{'header': 'CheckInDate'},
+                     {'header': 'BoxCount'},
+                     {'header': 'ACTIVE'},
+                     {'header': 'COMPLETED'}]}
+worksheet.add_table(xlsxwriter.utility.xl_range(0,0, len(finale4), len(finale4.columns) - 1), options)
+
+writer.save()
+
+
+# In[19]:
+
+
+receiver = ['John.Blankenship@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Donald.Bendavid@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Sherry.Hyde@exelaonline.com', 'Regina.Brady@exelaonline.com', 'Kellie.Lake@exelaonline.com', 'Alexis.Stewart@exelaonline.com', 'Jailyn.Allen@exelaonline.com', 'Kanzas.Hicks@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Elizabeth.England@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Deborah.Otis@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'John.VanWinkle@exelaonline.com', 'Summer.Owens@exelaonline.com', 'Rebecca.Shuart@exelaonline.com', 'Teresa.Childress@exelaonline.com' ]
+copy = ['sam.momin@exelaonline.com', 'sasha.wernersbach@exelaonline.com', 'lunnie.smith@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com']
+#receiver = ['Virginia.Brantley@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Brenda.Brock@exelaonline.com', 'Chris.Birkeland@exelaonline.com' ]
+#copy = ['Sam.Momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
+body = 'Please find the latest VA Image and Box Inventory Report for OMPF within attached spreadsheets.'
+xfilename = filename + '.xlsx'
+xfilename2 = filename2 + '.xlsx'
+
+
+# In[20]:
+
+
+yag = yagmail.SMTP(user={'atlhome@lason.com': 'Exela Automated'}, password='lason123', 
+                   host='smtprelay.exelaonline.com', port=25, 
+                   smtp_ssl=False, smtp_starttls=False, smtp_skip_login=True)
+
+yag.send(
+    to=receiver,
+    cc=copy,
+    subject='VA Image and Box Inventory Report - OMPF ' + fileDate2,
+    contents=body,
+    attachments=[xfilename,xfilename2]
+    )
+
+
+# In[ ]:
+
+
+
+
