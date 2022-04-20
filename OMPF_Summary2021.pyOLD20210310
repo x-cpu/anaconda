@@ -6,19 +6,11 @@
 
 import pyodbc
 import pandas as pd
-#import numpy as np
 from datetime import datetime
 import os
-#import csv
-#from tabulate import tabulate
-#from email.mime.multipart import MIMEMultipart
-#from email.mime.text import MIMEText
-#from email.mime.base import MIMEBase
-#from email import encoders
 import sqlite3
 from sqlalchemy import create_engine
 import xlsxwriter
-#import smtplib
 import yagmail
 
 
@@ -392,6 +384,8 @@ writer.save()
 
 receiver = ['Clarissa.Hubbard@exelaonline.com', 'John.Blankenship@exelaonline.com', 'Trimeka.Parks@exelaonline.com', 'Matthew.Marlow@exelaonline.com', 'Donald.BenDavid@exelaonline.com', 'Rebekah.Taulbee@exelaonline.com', 'Virginia.Todd@exelaonline.com', 'Kristen.Adams@exelaonline.com', 'Donna.Leach@exelaonline.com', 'Stephanie.King@exelaonline.com', 'Lisa.Stewart@exelaonline.com', 'Brandon.Lewis@exelaonline.com', 'Tausha.Woods@exelaonline.com', 'Danny.Bishop@exelaonline.com', 'Robert.Searcy@exelaonline.com', 'Juarez.Johnson@exelaonline.com']
 copy = ['lunnie.smith@exelaonline.com', 'sam.momin@exelaonline.com', 'mark.bertram@exelaonline.com', 'richard.hyde@exelaonline.com', 'sasha.wernersbach@exelaonline.com', 'tim.shields@exelatech.com']
+#receiver = 'lunnie.smith@exelaonline.com'
+#copy = 'lunnie.smith@exelaonline.com'
 body = 'Please find the latest OMPF summary within attached spreadsheet.'
 xfilename = filename + '.xlsx'
 

@@ -56,8 +56,8 @@ CASE
 	WHEN pbatch like '01%' Then sum(numpages)
 	END 'RMC Images'
 from document 
-where ftpstime >= CAST(DATEADD(DAY,-DAY(GETDATE())+1, CAST(GETDATE() AS DATE)) AS DATETIME)
-and ftpstime < CONVERT(date, getDate())
+where ftpstime >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE())-1, 0)
+and ftpstime < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
 group by CONVERT(nvarchar, ftpstime, 101), pbatch, RMN) T
 group by T.UploadDate) X
 group by ROLLUP(UploadDate)''',cnxn)
@@ -68,11 +68,10 @@ df.to_csv (filename, index = False)
 me = 'Exela Automated <atlhome@lason.com>'
 password = 'lason123'
 server = 'smtprelay.exelaonline.com:25'
-you = ['danny.bishop@exelaonline.com', 'robert.searcy@exelaonline.com', 'tim.shields@exelaonline.com', 'stephanie.king@exelaonline.com']
-#you = ['sam.momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
-you2 = ['sam.momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
-#you = ['lunnie.smith@exelaonline.com']
-#you2 = ['lunnie.smith@exelaonline.com']
+#you = ['danny.bishop@exelaonline.com', 'robert.searcy@exelaonline.com', 'tim.shields@exelatech.com', 'stephanie.king@exelaonline.com', 'bala.parasuraman@exelatech.com']
+#you2 = ['tom.redmond@exelaonline.com', 'sam.momin@exelaonline.com', 'lunnie.smith@exelaonline.com']
+you = ['lunnie.smith@exelaonline.com']
+you2 = ['lunnie.smith@exelaonline.com']
 
 text = """
 Please find the latest monthly totals below:
@@ -102,7 +101,7 @@ html = html.format(table=tabulate(data, headers="firstrow", tablefmt="html"))
 message = MIMEMultipart(
     "alternative", None, [MIMEText(text), MIMEText(html,'html')])
 
-message['Subject'] = "Monthly Totals - FCS OMPF RMC"
+message['Subject'] = "Monthly Totals - FCS OMPF RMC - JAN 2021"
 message['From'] = me
 message['To'] = ", ".join(you)
 message['CC'] = ", ".join(you2)
